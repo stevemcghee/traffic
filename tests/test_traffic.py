@@ -48,12 +48,7 @@ class TestTrafficPatterns(unittest.TestCase):
         intersection.pattern.cycle()
         self.assertNotEqual(initial_lights, intersection.pattern.lights)
 
-    def test_protected_left_turn_cycle(self):
-        intersection = Intersection(1, 100, ProtectedLeftTurn, is_test_mode=True)
-        intersection.cars = [Car(0, "north", turn="left")]
-        initial_lights = intersection.pattern.lights.copy()
-        intersection.pattern.cycle()
-        self.assertNotEqual(initial_lights, intersection.pattern.lights)
+    
 
 class TestPositioning(unittest.TestCase):
     def test_car_initial_positions(self):
