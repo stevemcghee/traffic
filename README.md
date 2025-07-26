@@ -24,7 +24,7 @@ This program uses the terminal to display a grid representing a road intersectio
 
 The traffic lights cycle through standard green, yellow, and red phases to control the flow of traffic. The simulation continues until a predefined number of cars have successfully passed through the intersection.
 
-![Uploading Screen Recording 2025-07-26 at 14.27.40.gif…]()
+![screencast.gif](screencast.gif)
 
 ## Features
 
