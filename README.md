@@ -15,6 +15,7 @@
 
 # traffic
 
+
 A command-line traffic simulation program that visualizes cars moving through a single intersection with traffic lights.
 
 ## Description
@@ -22,6 +23,8 @@ A command-line traffic simulation program that visualizes cars moving through a 
 This program uses the terminal to display a grid representing a road intersection. Cars, represented by colored squares, are generated and move towards and through the intersection from all four directions (North, South, East, West).
 
 The traffic lights cycle through standard green, yellow, and red phases to control the flow of traffic. The simulation continues until a predefined number of cars have successfully passed through the intersection.
+
+![screencast.gif](screencast.gif)
 
 ## Features
 
