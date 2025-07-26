@@ -48,8 +48,6 @@ class TestTrafficPatterns(unittest.TestCase):
         intersection.pattern.cycle()
         self.assertNotEqual(initial_lights, intersection.pattern.lights)
 
-    
-
 class TestPositioning(unittest.TestCase):
     def test_car_initial_positions(self):
         self.assertEqual(Car(0, "north").x, LANE_N_X)
@@ -69,6 +67,40 @@ class TestPositioning(unittest.TestCase):
         self.assertNotEqual(grid[INTERSECTION_END_Y + 1][LANE_N_X + 2], " ")
         self.assertNotEqual(grid[LANE_W_Y + 2][INTERSECTION_START_X - 2], " ")
         self.assertNotEqual(grid[LANE_E_Y - 2][INTERSECTION_END_X + 2], " ")
+
+class TestCrashCondition(unittest.TestCase):
+    def test_crash_halts_simulation(self):
+        intersection = Intersection(10, 20, SimpleIntersection, is_test_mode=True)
+        # Manually place two cars that will collide
+        car1 = Car(1, "north")
+        car1.x = LANE_N_X
+        car1.y = LANE_E_Y + 1
+        car2 = Car(2, "east")
+        car2.x = LANE_N_X - 1
+        car2.y = LANE_E_Y
+        intersection.cars = [car1, car2]
+
+        # Set lights to green for both directions
+        intersection.pattern.lights['north'] = Light.GREEN
+        intersection.pattern.lights['east'] = Light.GREEN
+
+        # First update should cause a crash
+        intersection.update_cars()
+        self.assertEqual(intersection.crashes, 1)
+        self.assertTrue(intersection.crash_detected)
+
+        # Second update should stop all cars
+        intersection.update_cars()
+
+        # All cars should be stopped
+        for car in intersection.cars:
+            self.assertTrue(car.stopped)
+
+        # Attempt to spawn a new car
+        initial_car_count = len(intersection.cars)
+        intersection.spawn_car()
+        self.assertEqual(len(intersection.cars), initial_car_count)
+
 
 if __name__ == '__main__':
     unittest.main()

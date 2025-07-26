@@ -127,7 +127,7 @@ class TrafficPattern:
 
     def _run_phase(self, duration):
         for _ in range(duration):
-            if self.intersection.is_finished():
+            if self.intersection.is_finished() or (self.intersection.crash_detected and not self.intersection.ignore_crashes):
                 return True # Indicate simulation should stop
             self.intersection.steps += 1
             self.intersection.update_cars()
@@ -213,6 +213,7 @@ class Intersection:
         self.is_test_mode = is_test_mode
         self.steps = 0
         self.crashes = 0
+        self.crash_detected = False
         self.left_turn_percentage = left_turn_percentage
         self.distribution_factor = distribution_factor
         self.ignore_crashes = ignore_crashes
@@ -246,7 +247,7 @@ class Intersection:
         return self.passed_cars >= self.goal_cars or self.steps >= MAX_STEPS or (self.crashes > 0 and not self.ignore_crashes)
 
     def spawn_car(self):
-        if len(self.cars) >= self.concurrent_cars or not self._spawn_direction_pool:
+        if len(self.cars) >= self.concurrent_cars or not self._spawn_direction_pool or self.crash_detected:
             return
 
         direction = self._spawn_direction_pool[-1]
@@ -304,6 +305,12 @@ class Intersection:
             print(f"Crashes: {self.crashes}")
 
     def update_cars(self):
+        if self.crash_detected and not self.ignore_crashes:
+            for car in self.cars:
+                car.stopped = True
+                car.color = Color.RED
+            return
+
         intended_moves = {}
         for car in self.cars:
             car.stopped = False; car.color = Color.GREEN
@@ -317,8 +324,8 @@ class Intersection:
             next_x, next_y, buffer_x, buffer_y = car.x, car.y, car.x, car.y
             if car.direction == "north": next_y -= 1; buffer_y -= 2
             elif car.direction == "south": next_y += 1; buffer_y += 2
-            elif car.direction == "east": next_x += 1; buffer_x += 2
-            elif car.direction == "west": next_x -= 1; buffer_x -= 2
+            elif car.direction == "east": next_x += 1; buffer_y += 2
+            elif car.direction == "west": next_x -= 1; buffer_y -= 2
             is_car_ahead = self.get_car_at(next_x, next_y) or self.get_car_at(buffer_x, buffer_y)
             if is_car_ahead or (at_intersection and should_stop_for_light):
                 intended_moves[car.id] = (car.x, car.y)
@@ -333,6 +340,7 @@ class Intersection:
                 continue
             if intended_pos in occupied_next_spots:
                 self.crashes += 1
+                self.crash_detected = True
                 final_positions[car.id] = (car.x, car.y); car.stopped = True; car.color = Color.RED
             else:
                 final_positions[car.id] = intended_pos; occupied_next_spots.add(intended_pos)
